@@ -1,0 +1,88 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    confusion_matrix,
+    classification_report
+)
+
+# Load Iris dataset
+iris = load_iris(as_frame=True)
+df = iris.frame
+
+print("--- Dataset Preprocessing ---")
+print("Dataset Shape:", df.shape)
+
+print("Missing values per column:")
+print(df.isnull().sum())
+
+# Separate features and target
+X = df.drop(columns=["target"])
+y = df["target"]
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+# Train Gaussian Naive Bayes model
+gnb = GaussianNB()
+gnb.fit(X_train, y_train)
+
+# Make predictions
+y_pred = gnb.predict(X_test)
+
+print("\n--- Gaussian Naive Bayes Predictions ---")
+print("Predicted classes:\n", y_pred)
+
+# Model evaluation
+print("\n--- Model Evaluation ---")
+
+acc = accuracy_score(y_test, y_pred)
+prec = precision_score(y_test, y_pred, average="macro")
+rec = recall_score(y_test, y_pred, average="macro")
+
+print(f"Accuracy:  {acc:.4f}")
+print(f"Precision: {prec:.4f}")
+print(f"Recall:    {rec:.4f}")
+
+# Classification report
+print("\n--- Classification Report ---")
+print(
+    classification_report(
+        y_test,
+        y_pred,
+        target_names=iris.target_names
+    )
+)
+
+# Confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(7, 5))
+
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt="d",
+    cmap="Greens",
+    xticklabels=iris.target_names,
+    yticklabels=iris.target_names
+)
+
+plt.title("Confusion Matrix Heatmap (Gaussian Naive Bayes - Iris Dataset)")
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.tight_layout()
+plt.show()
