@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', 1000)
+pd.set_option('display.expand_frame_repr', False)
+
+data = {
+    'age': [25, 30, np.nan, 35, 40],
+    'salary': [50000, 60000, 70000, np.nan, 80000],
+    'city': ['newyork', 'paris', 'london', 'london', 'paris'],
+    'purchased': ['no', 'yes', 'no', 'yes', 'no']
+}
+
+df = pd.DataFrame(data)
+
+print("\n--- 1. Original Dataset (with Missing Values) ---")
+print(df)
+
+# Handle missing numerical values using mean
+df['age'] = df['age'].fillna(df['age'].mean())
+df['salary'] = df['salary'].fillna(df['salary'].mean())
+
+# Handle missing categorical values using mode
+df['city'] = df['city'].fillna(df['city'].mode()[0])
+
+print("\n--- 2. Dataset After Imputation (Mean/Mode) ---")
+print(df)
+
+# One-hot encoding
+df_encoded = pd.get_dummies(
+    df,
+    columns=['city', 'purchased'],
+    dtype=int
+)
+
+print("\n--- 3. Dataset After One-Hot Encoding (1/0 Format) ---")
+print(df_encoded)
+
+# Min-Max scaling
+scaler = MinMaxScaler()
+
+df_scaled = df_encoded.copy()
+
+df_scaled[['age', 'salary']] = scaler.fit_transform(
+    df_scaled[['age', 'salary']]
+)
+
+print("\n--- 4. Final Dataset After MinMaxScaler (0-1 Scaling) ---")
+print(df_scaled)
